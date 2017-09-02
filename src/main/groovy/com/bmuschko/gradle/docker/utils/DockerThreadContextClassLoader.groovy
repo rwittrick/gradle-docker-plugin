@@ -364,6 +364,30 @@ class DockerThreadContextClassLoader implements ThreadContextClassLoader {
      * {@inheritDoc}
      */
     @Override
+    def createCapAdds(String[] capabilities) {
+        Class capabilityClass = loadClass("${MODEL_PACKAGE}.Capability")
+        capabilities.collect { cap ->
+            capabilityClass.valueOf(cap)
+        }.toArray(Array.newInstance(capabilityClass, 0))
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    def createCapDrops(String[] capabilities) {
+        Class capabilityClass = loadClass("${MODEL_PACKAGE}.Capability")
+        capabilities.collect { cap ->
+            //capabilityClass.values().find { it.toString() == cap }
+            capabilityClass.valueOf(cap)
+        }.toArray(Array.newInstance(capabilityClass, 0))
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     def createDevice(final String deviceString) {
         Class deviceClass = loadClass("${MODEL_PACKAGE}.Device")
         try {

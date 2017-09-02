@@ -203,6 +203,25 @@ interface ThreadContextClassLoader {
     def createRestartPolicy(String restartPolicy)
 
     /**
+     * Creates an array of instances of <a href="https://github.com/docker-java/docker-java/blob/master/src/main/java/com/github/dockerjava/api/model/Capability.java">Capability</a>
+     * from thread context classloader.
+     *
+     * @param capabilities A list of the capAdd capabilities to create. Each entry is like --cap-add on docker command line.
+     * @return Array of Instance
+     */
+    def createCapAdds(String[] capabilities)
+
+    /**
+     * Creates an array of instances of <a href="https://github.com/docker-java/docker-java/blob/master/src/main/java/com/github/dockerjava/api/model/Capability.java">Capability</a>
+     * from thread context classloader.
+     *
+     * @param capabilities A list of the capDrop capabilities to create. Each entry is like --cap-drop on docker command line.
+     * @return Array of Instance
+     */
+    def createCapDrops(String[] capabilities)
+    
+
+    /**
      * Creates instance of <a href="https://github.com/docker-java/docker-java/blob/master/src/main/java/com/github/dockerjava/api/model/Device.java">Device</a>
      * @param  a string with serialized value which can be parsed by the Device.parse method
      * @return Instance of Device

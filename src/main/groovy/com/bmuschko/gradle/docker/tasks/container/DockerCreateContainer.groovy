@@ -152,6 +152,15 @@ class DockerCreateContainer extends AbstractDockerRemoteApiTask {
 
     @Input
     @Optional
+    String[] capAdds
+
+    @Input
+    @Optional
+    String[] capDrops
+
+
+    @Input
+    @Optional
     List<String> devices
 
     /**
@@ -335,6 +344,17 @@ class DockerCreateContainer extends AbstractDockerRemoteApiTask {
             containerCommand.withRestartPolicy(threadContextClassLoader.createRestartPolicy(getRestartPolicy()))
         }
 
+        if(getCapAdds()) {
+            def createdCapAdds = threadContextClassLoader.createCapAdds(getCapAdds())
+            containerCommand.withCapAdd(createdCapAdds)
+        }
+
+        if(getCapDrops()) {
+            def createdCapDrops = threadContextClassLoader.createCapDrops(getCapDrops())
+            containerCommand.withCapDrop(createdCapDrops)
+        }
+
+
         if (getDevices()) {
             def createdDevices = getDevices().collect { threadContextClassLoader.createDevice(it) }
             containerCommand.withDevices(CollectionUtil.toArray(createdDevices))
@@ -365,4 +385,3 @@ class DockerCreateContainer extends AbstractDockerRemoteApiTask {
         }
     }
 }
-

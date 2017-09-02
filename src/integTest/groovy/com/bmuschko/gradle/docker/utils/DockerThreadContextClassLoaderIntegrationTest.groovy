@@ -16,13 +16,13 @@ class DockerThreadContextClassLoaderIntegrationTest extends AbstractIntegrationT
 
     @Shared
     Project project
-    
+
     @Shared
     DockerExtension dockerExtension
-    
+
     @Shared
     ThreadContextClassLoader threadContextClassLoader
-    
+
     @Shared
     DockerClientConfiguration dockerClientConfiguration
 
@@ -32,7 +32,7 @@ class DockerThreadContextClassLoaderIntegrationTest extends AbstractIntegrationT
         project.repositories {
             mavenCentral()
         }
-        
+
         dockerExtension = new DockerExtension(project)
         threadContextClassLoader = new DockerThreadContextClassLoader(dockerExtension)
         dockerClientConfiguration = new DockerClientConfiguration(url: 'tcp://localhost:2375')
@@ -317,6 +317,68 @@ class DockerThreadContextClassLoaderIntegrationTest extends AbstractIntegrationT
         instance[2].accessMode.toString() == 'rw'
     }
 
+    def "Can create capAdds with class of type Capability"() {
+        when:
+        def instance = null
+
+        def capAdds = ['NET_ADMIN', 'SYS_ADMIN'] as String[]
+
+        threadContextClassLoader.withClasspath(project.configurations.dockerJava.files, dockerClientConfiguration) {
+            instance = createCapAdds(capAdds)
+        }
+
+        then:
+        noExceptionThrown()
+        instance
+        instance.size() == capAdds.size()
+        instance[0].toString() == 'NET_ADMIN'
+        instance[1].toString() == 'SYS_ADMIN'
+    }
+
+    def "Throw exception when wrong format is used in capAdds to create a class of type Capability"() {
+        when:
+        threadContextClassLoader.withClasspath(project.configurations.dockerJava.files, dockerClientConfiguration) {
+            createCapAdds(capAdds as String[])
+        }
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        capAdds << ['UNKNOWN']
+    }
+
+    def "Can create capDrops with class of type Capability"() {
+        when:
+        def instance = null
+
+        def capDrops = ['KILL', 'LEASE'] as String[]
+
+        threadContextClassLoader.withClasspath(project.configurations.dockerJava.files, dockerClientConfiguration) {
+            instance = createCapAdds(capDrops)
+        }
+
+        then:
+        noExceptionThrown()
+        instance
+        instance.size() == capDrops.size()
+        instance[0].toString() == 'KILL'
+        instance[1].toString() == 'LEASE'
+    }
+
+    def "Throw exception when wrong format is used in capDrops to create a class of type Capability"() {
+        when:
+        threadContextClassLoader.withClasspath(project.configurations.dockerJava.files, dockerClientConfiguration) {
+             createCapDrops(capDrops as String[])
+        }
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        capDrops << ['UNKNOWN']
+    }
+
     def "Can create class of type Device"() {
         when:
         def instance = null
@@ -330,7 +392,7 @@ class DockerThreadContextClassLoaderIntegrationTest extends AbstractIntegrationT
         instance.pathOnHost == source
         instance.pathInContainer == destination
         instance.cGroupPermissions == permissions
-        
+
         where:
         deviceString            | permissions | source     | destination
         '/dev/sda:/dev/xvda:rw' | 'rw'        | '/dev/sda' | '/dev/xvda'
@@ -350,7 +412,7 @@ class DockerThreadContextClassLoaderIntegrationTest extends AbstractIntegrationT
         where:
         deviceString << ['', '/dev/sda:/dev/xvda:a']
     }
-    
+
     def "Can create class of type WaitContainerResultCallback"() {
         when:
         def instance = null
